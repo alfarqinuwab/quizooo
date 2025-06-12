@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDownIcon, ChevronUpIcon, UserGroupIcon, UserIcon, BookOpenIcon, ShieldCheckIcon, ClockIcon, ArrowPathIcon, SparklesIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ChevronUpIcon, BookOpenIcon, ShieldCheckIcon, ClockIcon, ArrowPathIcon, SparklesIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 const stages = ['المرحلة الابتدائية', 'المرحلة المتوسطة', 'المرحلة الثانوية', 'عام'];
 const grades = ['الصف الأول', 'الصف الثاني', 'الصف الثالث', 'الصف الرابع', 'الصف الخامس', 'الصف السادس', 'عام'];
@@ -28,7 +27,6 @@ const lessons = Array.from({ length: 20 }, (_, i) => `الدرس ${i + 1}`);
 const units = Array.from({ length: 5 }, (_, i) => `وحدة ${i + 1}`);
 
 const Home: React.FC = () => {
-  const navigate = useNavigate();
   const teamSetupRef = useRef<HTMLDivElement>(null);
   const [teamCount, setTeamCount] = useState(6);
   const [selectedPowers, setSelectedPowers] = useState<string[]>([]);
