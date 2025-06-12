@@ -19,7 +19,7 @@ module.exports = {
         'button-yellow': '#F59E0B',
       },
       fontFamily: {
-        'arabic': ['Cairo', 'Amiri', 'sans-serif'],
+        'arabic': ['Tajawal', 'sans-serif'],
       },
       borderWidth: {
         '3': '3px',
