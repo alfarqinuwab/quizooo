@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    direction: rtl;
+    font-family: 'Cairo', 'Amiri', sans-serif;
+    background: #fff;
+  }
+  
+  body {
+    @apply bg-background text-text-dark font-arabic font-bold;
+    text-align: center;
+    margin: 0;
+  }
+
+  /* RTL specific resets */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    text-align: right;
+  }
+}
+
+@layer components {
+  .form-input,
+  .form-select {
+    @apply w-full px-6 py-3 border-3 border-border-purple rounded-xl font-bold text-lg focus:outline-none focus:ring-2 focus:ring-primary-purple bg-white text-text-dark;
+    text-align: right;
+  }
+
+  .main-section-title {
+    @apply text-3xl md:text-4xl font-extrabold text-primary-purple mb-8 mt-12;
+  }
+
+  .sub-section-title {
+    @apply text-xl font-bold text-primary-purple mb-4;
+  }
+
+  .card-diagonal-bg {
+    background: repeating-linear-gradient(-20deg, #F3F4FF 0 30px, #E5E7EB 30px 60px);
+  }
+
+  .custom-shadow {
+    box-shadow: 0 4px 16px 0 rgba(107,70,193,0.08);
+  }
+
+  .custom-border {
+    border: 3px solid #6B46C1;
+  }
+
+  .custom-rounded {
+    border-radius: 18px;
+  }
+
+  .custom-btn {
+    @apply font-extrabold rounded-xl border-3 border-border-purple shadow-button px-8 py-3 text-lg transition-all;
+  }
+
+  .custom-btn-blue {
+    @apply bg-button-blue text-white border-button-yellow;
+  }
+
+  .custom-btn-yellow {
+    @apply bg-button-yellow text-white;
+  }
+
+  .custom-btn-outline {
+    @apply bg-white text-primary-purple;
+  }
+
+  /* RTL specific spacing utilities */
+  .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+  }
+
+  /* RTL specific flex utilities */
+  .flex-row-reverse {
+    flex-direction: row-reverse;
+  }
+
+  /* RTL specific margin utilities */
+  .ml-auto {
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  .mr-auto {
+    margin-right: auto;
+    margin-left: 0;
+  }
+}
+
+/* RTL specific animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* RTL specific transitions */
+.rtl-slide-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.rtl-slide-exit {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+/* RTL specific styles */
+[dir="rtl"] .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+} 
