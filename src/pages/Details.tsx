@@ -103,7 +103,7 @@ const Details = () => {
       {/* Main Content */}
       <div className="flex flex-row flex-1 w-full px-8 py-8 gap-4" style={{background: '#fff', marginTop: 90, justifyContent: 'center', alignItems: 'flex-start'}}>
         {/* Right Side: Timer and Powerups */}
-        <div className="flex flex-col items-center gap-2 min-w-[260px] max-w-[300px] mt-2 ml-16">
+        <div className="flex flex-col items-center gap-2 min-w-[260px] max-w-[300px] mt-2 ml-32">
           {/* Timer */}
           <TimerCircle timeLeft={30} />
           {/* Powerups */}
