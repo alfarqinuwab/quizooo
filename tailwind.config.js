@@ -5,6 +5,9 @@ module.exports = {
     "./public/index.html"
   ],
   theme: {
+    fontFamily: {
+      sans: ['Tajawal', 'sans-serif'],
+    },
     extend: {
       colors: {
         'primary-purple': '#6B46C1',
@@ -17,9 +20,6 @@ module.exports = {
         'border-purple': '#6B46C1',
         'button-blue': '#2B2A7F',
         'button-yellow': '#F59E0B',
-      },
-      fontFamily: {
-        'arabic': ['Tajawal', 'sans-serif'],
       },
       borderWidth: {
         '3': '3px',

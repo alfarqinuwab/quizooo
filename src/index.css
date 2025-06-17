@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,14 +8,20 @@
 @layer base {
   html {
     direction: rtl;
-    font-family: 'Tajawal', sans-serif;
-    background: #fff;
+    font-family: 'Tajawal', sans-serif !important;
   }
-  
+
   body {
-    @apply bg-background text-text-dark font-arabic font-bold;
+    @apply bg-background text-text-dark font-bold;
     text-align: center;
     margin: 0;
+    padding: 0;
+    font-family: 'Tajawal', sans-serif !important;
+  }
+
+  /* Apply Oswald font to numbers */
+  .number-font {
+    font-family: 'Oswald', sans-serif !important;
   }
 
   /* RTL specific resets */
@@ -32,6 +39,26 @@
 }
 
 @layer components {
+  .custom-border {
+    @apply border-3 border-primary-purple;
+  }
+
+  .custom-rounded {
+    @apply rounded-2xl;
+  }
+
+  .custom-btn {
+    @apply bg-primary-purple text-white px-8 py-4 rounded-lg hover:bg-primary-purple/90 transition-colors text-xl font-bold;
+  }
+
+  .custom-input {
+    @apply custom-border custom-rounded px-8 py-6 text-2xl font-bold w-full outline-none focus:ring-2 focus:ring-primary-purple bg-white text-primary-purple;
+  }
+
+  .custom-label {
+    @apply absolute -top-3 right-4 bg-white px-2 text-primary-purple font-extrabold text-xl z-10;
+  }
+
   .form-input,
   .form-select {
     @apply w-full px-6 py-3 border-3 border-border-purple rounded-xl font-bold text-lg focus:outline-none focus:ring-2 focus:ring-primary-purple bg-white text-text-dark;
@@ -52,18 +79,6 @@
 
   .custom-shadow {
     box-shadow: 0 4px 16px 0 rgba(107,70,193,0.08);
-  }
-
-  .custom-border {
-    border: 3px solid #6B46C1;
-  }
-
-  .custom-rounded {
-    border-radius: 18px;
-  }
-
-  .custom-btn {
-    @apply font-extrabold rounded-xl border-3 border-border-purple shadow-button px-8 py-3 text-lg transition-all;
   }
 
   .custom-btn-blue {

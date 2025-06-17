@@ -26,7 +26,7 @@ const Navigation: React.FC = () => {
           <Link to="/" className="text-white font-bold text-lg hover:text-accent-orange transition-colors">الصفحة الرئيسية</Link>
           <Link to="/about" className="text-white font-bold text-lg hover:text-accent-orange transition-colors">نبذة عنا</Link>
           <Link 
-            to="/quiz" 
+            to="/" 
             className="font-extrabold text-white text-base px-4 py-1.5 rounded-[2rem] border-3 border-accent-orange bg-accent-orange hover:bg-accent-orange/90 transition-colors"
             style={{boxShadow: '0 2px 8px 0 rgba(245,158,11,0.12)'}}
           >
