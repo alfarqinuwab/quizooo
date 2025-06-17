@@ -251,11 +251,6 @@ const Quiz = () => {
           </div>
         ))}
       </div>
-
-      {/* Footer */}
-      <footer className="w-full bg-primary-purple/10 border-t-2 border-[#F59E0B] py-3 text-center text-primary-purple text-sm font-normal" style={{position: 'relative', zIndex: 10}}>
-        جميع الحقوق محفوظة © {new Date().getFullYear()}
-      </footer>
     </div>
   );
 };
