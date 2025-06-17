@@ -4,26 +4,7 @@ import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 
 const POINTS = [100, 200, 300, 400];
 
-const groupColors = [
-  'bg-primary-purple text-white',
-  'bg-yellow-400 text-primary-purple',
-  'bg-primary-purple text-white',
-  'bg-primary-purple text-white',
-  'bg-primary-purple text-white',
-  'bg-primary-purple text-white',
-];
-
-const borderGroupColors = [
-  'border-primary-purple',
-  'border-yellow-400',
-  'border-primary-purple',
-  'border-primary-purple',
-  'border-primary-purple',
-  'border-primary-purple',
-];
-
 const HEADER_HEIGHT = 120; // px (increased height)
-const BOTTOM_BAR_HEIGHT = 120; // px
 
 const Quiz = () => {
   const navigate = useNavigate();

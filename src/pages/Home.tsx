@@ -13,14 +13,6 @@ const powerups = [
   { id: 'shield', name: 'درع الحماية', icon: <ShieldCheckIcon className="w-6 h-6" /> },
   { id: 'time', name: 'وقت إضافي', icon: <ClockIcon className="w-6 h-6" /> },
 ];
-const teamNames = [
-  'اسم الفريق الأول',
-  'اسم الفريق الثاني',
-  'اسم الفريق الثالث',
-  'اسم الفريق الرابع',
-  'اسم الفريق الخامس',
-  'اسم الفريق السادس',
-];
 
 // Simulate 20 units
 const units = Array.from({ length: 20 }, (_, i) => `وحدة ${i + 1}`);
@@ -33,7 +25,6 @@ const Home: React.FC = () => {
   const [selectedUnit, setSelectedUnit] = useState<number | null>(null);
   const [showAllUnits, setShowAllUnits] = useState(false);
   const [className, setClassName] = useState('');
-  const firstTeamInputRef = useRef<HTMLInputElement>(null);
   const teamInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
 
