@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, BookOpenIcon, ShieldCheckIcon, ClockIcon, ArrowPathIcon, SparklesIcon, InformationCircleIcon, UserGroupIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,6 +27,10 @@ const Home: React.FC = () => {
   const [className, setClassName] = useState('');
   const teamInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem('selectedPowers', JSON.stringify(selectedPowers));
+  }, [selectedPowers]);
 
   const togglePower = (powerId: string) => {
     if (selectedPowers.includes(powerId)) {
@@ -115,30 +119,32 @@ const Home: React.FC = () => {
       {/* Units Section */}
       <h2 className="main-section-title mb-6 mt-0">الوحدات</h2>
       <div className="grid grid-cols-5 gap-8 w-[1600px] mb-8">
-        {displayedUnits.map((unit, idx) => (
-          <div
-            key={idx}
-            onClick={() => handleUnitSelect(idx)}
-            className={`card-diagonal-bg custom-border custom-rounded custom-shadow flex flex-col overflow-hidden aspect-square cursor-pointer transition-all duration-300 ${
-              selectedUnit === idx
-                ? 'bg-primary-purple'
-                : 'bg-accent-orange'
-            }`}
-          >
-            <div 
-              className={`font-extrabold text-lg py-4 px-4 text-center transition-colors duration-300 ${
-                selectedUnit === idx
-                  ? 'bg-primary-purple text-white'
-                  : 'bg-accent-orange text-white'
-              }`} 
-              style={{borderBottom: '3px solid #6B46C1'}}
+        {displayedUnits.map((unit, idx) => {
+          const isSelected = selectedUnit === idx;
+          const isDimmed = selectedUnit !== null && !isSelected;
+          return (
+            <div
+              key={idx}
+              onClick={() => handleUnitSelect(idx)}
+              className={`card-diagonal-bg custom-rounded custom-shadow flex flex-col overflow-hidden aspect-square cursor-pointer transition-all duration-300
+                ${isSelected ? 'bg-primary-purple border-3 border-primary-purple' : isDimmed ? 'bg-gray-300 border-3 border-gray-500' : 'bg-accent-orange custom-border'}
+              `}
             >
-              {unit}
+              <div
+                className={`font-extrabold text-lg py-4 px-4 text-center transition-colors duration-300
+                  ${isSelected ? 'bg-primary-purple text-white' : isDimmed ? 'bg-gray-300 text-gray-700' : 'bg-accent-orange text-white'}
+                `}
+                style={{
+                  borderBottom: isDimmed ? '3px solid #6B7280' : '3px solid #6B46C1'
+                }}
+              >
+                {unit}
+              </div>
+              <div className="flex-1 flex items-center justify-center">
+              </div>
             </div>
-            <div className="flex-1 flex items-center justify-center">
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Show All Link */}

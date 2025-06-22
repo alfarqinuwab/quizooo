@@ -25,7 +25,12 @@ const Quiz = () => {
     if (savedTeams) {
       const teamNames = JSON.parse(savedTeams);
       setTeams(teamNames);
-      setScores(Array(teamNames.length).fill(0));
+      const savedScores = localStorage.getItem('scores');
+      if (savedScores) {
+        setScores(JSON.parse(savedScores));
+      } else {
+        setScores(Array(teamNames.length).fill(0));
+      }
     }
     const savedClass = localStorage.getItem('className');
     if (savedClass) setClassName(savedClass);
@@ -55,19 +60,6 @@ const Quiz = () => {
     localStorage.setItem('visitedRectangles', JSON.stringify(visitedRectangles));
   }, [visitedRectangles]);
 
-  useEffect(() => {
-    // Check for saved visited rectangles
-    const savedVisited = localStorage.getItem('visitedRectangles');
-    if (savedVisited) {
-      setVisitedRectangles(JSON.parse(savedVisited));
-    }
-
-    // Cleanup function to reset visited rectangles when leaving the page
-    return () => {
-      localStorage.removeItem('visitedRectangles');
-    };
-  }, []);
-
   const handleScore = (idx: number, delta: number) => {
     setScores(prev => prev.map((score, i) => (i === idx ? score + delta : score)));
   };
@@ -79,6 +71,10 @@ const Quiz = () => {
       setVisitedRectangles(newVisited);
       localStorage.setItem('visitedRectangles', JSON.stringify(newVisited));
       localStorage.setItem('lastClickedRectangle', rectangleId);
+      // Advance group for next question
+      const nextGroup = (activeGroup + 1) % teams.length;
+      localStorage.setItem('activeGroup', nextGroup.toString());
+      setActiveGroup(nextGroup);
       navigate('/details');
     }
   };
@@ -94,11 +90,22 @@ const Quiz = () => {
     return `${baseClasses} ${isVisited ? visitedClasses : unvisitedClasses}`;
   };
 
+  // Exit button handler
+  const handleExit = () => {
+    localStorage.removeItem('visitedRectangles');
+    localStorage.removeItem('scores');
+    setVisitedRectangles([]);
+    navigate('/');
+  };
+
   return (
     <div className="w-screen h-screen relative bg-background font-sans overflow-hidden">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-primary-purple text-white py-10 px-8 flex items-center justify-between border-b-4 border-[#F59E0B]" style={{height: HEADER_HEIGHT}}>
-        <button className="flex items-center gap-2 text-lg font-bold mr-auto">
+        <button 
+          className="flex items-center gap-2 text-lg font-bold mr-auto"
+          onClick={handleExit}
+        >
           <ArrowLeftOnRectangleIcon className="w-7 h-7" />
           خروج
         </button>
