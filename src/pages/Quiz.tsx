@@ -29,7 +29,7 @@ const Quiz = () => {
       if (savedScores) {
         setScores(JSON.parse(savedScores));
       } else {
-        setScores(Array(teamNames.length).fill(0));
+      setScores(Array(teamNames.length).fill(0));
       }
     }
     const savedClass = localStorage.getItem('className');
@@ -101,7 +101,7 @@ const Quiz = () => {
   return (
     <div className="w-screen h-screen relative bg-background font-sans overflow-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-primary-purple text-white py-10 px-8 flex items-center justify-between border-b-4 border-[#F59E0B]" style={{height: HEADER_HEIGHT}}>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-primary-purple text-white py-10 px-8 flex items-center justify-between border-b-4 border-[#facc15]" style={{height: HEADER_HEIGHT}}>
         <button 
           className="flex items-center gap-2 text-lg font-bold mr-auto"
           onClick={handleExit}
@@ -223,8 +223,8 @@ const Quiz = () => {
             <button
               className={`rounded-full px-6 py-3 text-2xl font-bold mb-2 transition-all duration-200 flex items-center justify-center w-full shadow-lg
                 ${activeGroup === idx
-                  ? 'bg-[#F59E0B] text-primary-purple border-4 border-[#F59E0B] transform scale-105'
-                  : 'bg-primary-purple text-white border-4 border-[#F59E0B] hover:bg-primary-purple/90'}
+                                ? 'bg-[#facc15] text-primary-purple border-4 border-[#facc15] transform scale-105'
+              : 'bg-primary-purple text-white border-4 border-[#facc15] hover:bg-primary-purple/90'}
               `}
               onClick={() => {
                 setActiveGroup(idx);
@@ -233,9 +233,9 @@ const Quiz = () => {
             >
               {team}
             </button>
-            <div className="flex items-center bg-white rounded-full p-4 shadow-lg w-full justify-between border-4 border-[#F59E0B] h-[80px]">
+            <div className="flex items-center bg-white rounded-full p-4 shadow-lg w-full justify-between border-4 border-[#facc15] h-[80px]">
               <button
-                className="rounded-full w-12 h-12 flex items-center justify-center bg-primary-purple hover:bg-primary-purple/90 transition-colors shadow-md border-4 border-[#F59E0B]"
+                className="rounded-full w-12 h-12 flex items-center justify-center bg-primary-purple hover:bg-primary-purple/90 transition-colors shadow-md border-4 border-[#facc15]"
                 onClick={() => handleScore(idx, -100)}
               >
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -245,7 +245,7 @@ const Quiz = () => {
               </button>
               <span className="text-4xl font-extrabold text-center text-primary-purple number-font">{scores[idx]}</span>
               <button
-                className="rounded-full w-12 h-12 flex items-center justify-center bg-primary-purple hover:bg-primary-purple/90 transition-colors shadow-md border-4 border-[#F59E0B]"
+                className="rounded-full w-12 h-12 flex items-center justify-center bg-primary-purple hover:bg-primary-purple/90 transition-colors shadow-md border-4 border-[#facc15]"
                 onClick={() => handleScore(idx, 100)}
               >
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">

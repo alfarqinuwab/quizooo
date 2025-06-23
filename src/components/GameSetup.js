@@ -57,7 +57,7 @@ const GameSetup = () => {
               );
             }}
           >
-            <div className="bg-[#F59E0B] rounded-t-lg p-2 text-center">
+            <div className="bg-[#facc15] rounded-t-lg p-2 text-center">
               الدرس الأول
             </div>
           </div>
@@ -69,13 +69,13 @@ const GameSetup = () => {
       </div>
 
       <div className="flex justify-center items-center gap-4 mb-8">
-        <div className="w-12 h-12 rounded-full bg-[#F59E0B] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-[#facc15] flex items-center justify-center">
           <span className="text-white font-bold">1</span>
         </div>
-        <div className="w-12 h-12 rounded-full bg-[#F59E0B] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-[#facc15] flex items-center justify-center">
           <span className="text-white font-bold">2</span>
         </div>
-        <div className="w-12 h-12 rounded-full bg-[#F59E0B] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-[#facc15] flex items-center justify-center">
           <span className="text-white font-bold">3</span>
         </div>
       </div>

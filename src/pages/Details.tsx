@@ -6,7 +6,7 @@ const TimerCircle = ({ timeLeft }: { timeLeft: number }) => {
   const radius = 85;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (timeLeft / 30) * circumference;
-  const progressColor = timeLeft <= 5 ? '#EF4444' : '#F59E0B';
+      const progressColor = timeLeft <= 5 ? '#EF4444' : '#facc15';
 
   return (
     <div className="relative w-[350px] h-[350px]">
@@ -172,12 +172,12 @@ const Details = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col relative">
       {/* Header */}
-      <header className="w-full bg-primary-purple text-white flex flex-row items-center justify-between px-10 py-6 border-b-4 border-[#F59E0B] fixed top-0 left-0 right-0 z-50" style={{minHeight: 90}}>
+              <header className="w-full bg-primary-purple text-white flex flex-row items-center justify-between px-10 py-6 border-b-4 border-[#facc15] fixed top-0 left-0 right-0 z-50" style={{minHeight: 90}}>
         <div className="w-24" /> {/* Spacer */}
         <h1 className="text-4xl font-extrabold mx-auto absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">{className}</h1>
         <div className="flex items-center gap-4">
           <span 
-            className="text-lg font-bold cursor-pointer hover:text-[#F59E0B] transition-colors" 
+            className="text-lg font-bold cursor-pointer hover:text-[#facc15] transition-colors" 
             onClick={handleQuestionsBoardClick}
           >
             لوحة الأسئلة
@@ -189,11 +189,11 @@ const Details = () => {
       </header>
       {/* Main Content */}
       <div className="flex flex-row flex-1 w-full px-8 py-8 gap-8" style={{background: '#fff', marginTop: 90, justifyContent: 'center', alignItems: 'flex-start'}}>
-        {/* Timer */}
+          {/* Timer */}
         <div className="flex flex-col items-center gap-8 min-w-[350px] max-w-[350px] mt-10">
           <TimerCircle timeLeft={timeLeft} />
           <button
-            className={`mt-4 flex items-center gap-2 px-8 py-4 rounded-full text-xl font-bold shadow-md transition-colors border-4 border-[#F59E0B]
+            className={`mt-4 flex items-center gap-2 px-8 py-4 rounded-full text-xl font-bold shadow-md transition-colors border-4 border-[#facc15]
               ${timeLeft === 0 ? 'bg-red-500 text-white cursor-not-allowed' : 'bg-primary-purple text-white hover:bg-primary-purple/90'}`}
             onClick={() => {
               if (timeLeft === 0) return;
@@ -224,12 +224,12 @@ const Details = () => {
               <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
                 <div
                   className="w-20 h-20 rounded-full bg-[#6B46C1] flex items-center justify-center border-4"
-                  style={{ borderColor: '#F59E0B' }}
+                  style={{ borderColor: '#facc15' }}
                   onMouseEnter={() => setHoveredPower(power)}
                   onMouseLeave={() => setHoveredPower(null)}
                 >
                   {powerupIcons[power] || <span className="text-white font-bold">?</span>}
-                </div>
+            </div>
                 {/* Tooltip */}
                 {hoveredPower === power && (
                   <div
@@ -238,9 +238,9 @@ const Details = () => {
                   >
                     {powerupExplanations[power]}
                     <div style={tooltipPointerStyle} />
-                  </div>
+            </div>
                 )}
-              </div>
+            </div>
             ))}
           </div>
         </div>
@@ -248,7 +248,7 @@ const Details = () => {
         <div className="flex flex-col flex-1 items-center justify-start gap-8 mt-10 relative">
           {/* Points Rectangle */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-12 z-20">
-            <div className="bg-primary-purple text-[#F59E0B] text-6xl font-extrabold rounded-3xl border-8 border-white shadow-lg px-24 py-6 number-font">
+            <div className="bg-primary-purple text-[#facc15] text-6xl font-extrabold rounded-3xl border-8 border-white shadow-lg px-24 py-6 number-font">
               100
             </div>
           </div>
@@ -284,9 +284,9 @@ const Details = () => {
             </div>
           )}
           <div className="flex flex-row gap-6 justify-center w-full mt-8">
-            <button className="bg-primary-purple text-white border-2 border-[#F59E0B] rounded-full px-8 py-3 text-xl font-bold shadow-md">إظهار الإجابة</button>
+            <button className="bg-primary-purple text-white border-2 border-[#facc15] rounded-full px-8 py-3 text-xl font-bold shadow-md">إظهار الإجابة</button>
             <button 
-              className="bg-primary-purple text-white border-2 border-[#F59E0B] rounded-full px-8 py-3 text-xl font-bold shadow-md"
+              className="bg-primary-purple text-white border-2 border-[#facc15] rounded-full px-8 py-3 text-xl font-bold shadow-md"
               onClick={() => setShowOptions((prev) => !prev)}
             >
               {showOptions ? 'إخفاء الخيارات' : 'إظهار الخيارات'}
@@ -295,7 +295,7 @@ const Details = () => {
         </div>
         {/* Right Side: Groups */}
         <div className="flex flex-col gap-6 min-w-[260px] max-w-[260px] w-full mt-10">
-          <button className="bg-[#F59E0B] text-white text-2xl font-bold rounded-full py-4 px-12 shadow-md mb-2 w-full">من جاوب</button>
+          <button className="bg-[#facc15] text-white text-2xl font-bold rounded-full py-4 px-12 shadow-md mb-2 w-full">من جاوب</button>
           {teams.map((team, idx) => (
             <button
               key={idx}
@@ -333,7 +333,7 @@ const Details = () => {
         </div>
       </div>
       {/* Bottom Yellow Bar */}
-      <div className="w-full h-1 bg-[#F59E0B] absolute bottom-3 left-0 right-0" />
+              <div className="w-full h-1 bg-[#facc15] absolute bottom-3 left-0 right-0" />
       <div className="w-full h-3 bg-primary-purple absolute bottom-0 left-0 right-0" />
     </div>
   );

@@ -52,7 +52,7 @@ const Header = () => {
         ease: "easeOut",
         staggerChildren: 0.1
       }}
-      className="fixed top-0 left-0 right-0 z-50 bg-[#6B46C1] shadow-sm border-b-4 border-[#F59E0B]"
+      className="fixed top-0 left-0 right-0 z-50 bg-[#6B46C1] shadow-sm border-b-4 border-[#facc15]"
       dir="rtl"
     >
       <div className="container mx-auto px-4">
@@ -65,7 +65,7 @@ const Header = () => {
           >
             <Link
               to="/login"
-              className="flex items-center space-x-2 space-x-reverse text-white/90 hover:text-[#F59E0B] transition-colors duration-200"
+              className="flex items-center space-x-2 space-x-reverse text-white/90 hover:text-[#facc15] transition-colors duration-200"
             >
               <span className="font-medium">تسجيل الدخول</span>
               <svg
@@ -95,14 +95,14 @@ const Header = () => {
               >
                 <Link
                   to={item.path}
-                  className={`relative px-3 py-2 text-white/90 hover:text-[#F59E0B] transition-colors duration-200 font-medium
-                    ${location.pathname === item.path ? 'text-[#F59E0B]' : ''}`}
+                          className={`relative px-3 py-2 text-white/90 hover:text-[#facc15] transition-colors duration-200 font-medium
+          ${location.pathname === item.path ? 'text-[#facc15]' : ''}`}
                 >
                   {item.name}
                   {location.pathname === item.path && item.path !== '/' && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F59E0B] rounded-full"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#facc15] rounded-full"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.2 }}
@@ -112,7 +112,7 @@ const Header = () => {
                 {item.button && (
                   <Link
                     to={item.button.path}
-                    className="inline-flex items-center px-6 py-2 bg-[#F59E0B] text-white rounded-full font-medium hover:bg-[#F59E0B]/90 transition-colors duration-200 shadow-sm"
+                    className="inline-flex items-center px-6 py-2 bg-[#facc15] text-white rounded-full font-medium hover:bg-[#facc15]/90 transition-colors duration-200 shadow-sm"
                   >
                     {item.button.name}
                   </Link>

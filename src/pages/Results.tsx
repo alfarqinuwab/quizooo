@@ -26,7 +26,7 @@ const Results: React.FC = () => {
             <button
               onClick={() => navigate('/quiz')}
               className="custom-btn custom-btn-blue border-button-yellow text-xl w-full shadow-button"
-              style={{borderWidth: '3px', borderColor: '#F59E0B'}}
+              style={{borderWidth: '3px', borderColor: '#facc15'}}
             >
               حاول مرة أخرى
             </button>

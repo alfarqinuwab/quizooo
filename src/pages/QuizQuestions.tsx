@@ -9,7 +9,7 @@ const QuizQuestions: React.FC = () => {
         {/* Question Card */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-[#FFD600] font-bold">السؤال 1</span>
+            <span className="text-[#facc15] font-bold">السؤال 1</span>
             <span className="text-accent-orange">الوقت المتبقي: 30 ثانية</span>
           </div>
           
@@ -17,16 +17,16 @@ const QuizQuestions: React.FC = () => {
           
           {/* Answer Options */}
           <div className="grid grid-cols-2 gap-4">
-            <button className="p-4 border-2 border-[#FFD600] rounded-lg hover:bg-[#FFD600] hover:text-white transition-colors">
+            <button className="p-4 border-2 border-[#facc15] rounded-lg hover:bg-[#facc15] hover:text-white transition-colors">
               35
             </button>
-            <button className="p-4 border-2 border-[#FFD600] rounded-lg hover:bg-[#FFD600] hover:text-white transition-colors">
+            <button className="p-4 border-2 border-[#facc15] rounded-lg hover:bg-[#facc15] hover:text-white transition-colors">
               30
             </button>
-            <button className="p-4 border-2 border-[#FFD600] rounded-lg hover:bg-[#FFD600] hover:text-white transition-colors">
+            <button className="p-4 border-2 border-[#facc15] rounded-lg hover:bg-[#facc15] hover:text-white transition-colors">
               40
             </button>
-            <button className="p-4 border-2 border-[#FFD600] rounded-lg hover:bg-[#FFD600] hover:text-white transition-colors">
+            <button className="p-4 border-2 border-[#facc15] rounded-lg hover:bg-[#facc15] hover:text-white transition-colors">
               45
             </button>
           </div>
@@ -37,7 +37,7 @@ const QuizQuestions: React.FC = () => {
           <button className="px-6 py-3 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
             السابق
           </button>
-          <button className="px-6 py-3 bg-[#FFD600] text-white rounded-lg hover:bg-[#FFD600]/90 transition-colors">
+          <button className="px-6 py-3 bg-[#facc15] text-white rounded-lg hover:bg-[#facc15]/90 transition-colors">
             التالي
           </button>
         </div>
