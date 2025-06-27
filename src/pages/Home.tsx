@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, BookOpenIcon, ShieldCheckIcon, ClockIcon, ArrowPathIcon, SparklesIcon, InformationCircleIcon, UserGroupIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +11,21 @@ const avatarImages = [
   '/assets/avatars/6.png',
 ];
 
-const stages = ['المرحلة الابتدائية', 'المرحلة المتوسطة', 'المرحلة الثانوية', 'عام'];
+const teamColors = [
+  '#FF6B6B', // Red
+  '#4ECDC4', // Teal
+  '#45B7D1', // Blue
+  '#96CEB4', // Green
+  '#FFEAA7', // Yellow
+  '#DDA0DD', // Plum
+  '#FFB347', // Orange
+  '#87CEEB', // Sky Blue
+  '#98FB98', // Pale Green
+  '#F0E68C', // Khaki
+  '#FFB6C1', // Light Pink
+  '#20B2AA', // Light Sea Green
+];
+
 const grades = ['الصف الأول', 'الصف الثاني', 'الصف الثالث', 'الصف الرابع', 'الصف الخامس', 'الصف السادس'];
 const terms = ['الفصل الأول', 'الفصل الثاني'];
 
@@ -85,22 +99,23 @@ const newSectionItems = ['المرحلة الإبتدائية', 'المرحلة 
 interface Team {
   name: string;
   avatar: string;
+  color: string;
 }
 
 const Home: React.FC = () => {
-  const teamSetupRef = useRef<HTMLDivElement>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamNameInput, setTeamNameInput] = useState('');
   const [availableAvatars, setAvailableAvatars] = useState<string[]>(avatarImages);
+  const [availableColors, setAvailableColors] = useState<string[]>(teamColors);
   const [selectedPowers, setSelectedPowers] = useState<string[]>([]);
   const [selectedUnit, setSelectedUnit] = useState<number | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<number | null>(null);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [showAllUnits, setShowAllUnits] = useState(false);
-  const [showAllSubjects, setShowAllSubjects] = useState(false);
   const [className, setClassName] = useState('');
   const [selectedNewItem, setSelectedNewItem] = useState<number | null>(null);
-  const teamInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [hoveredStage, setHoveredStage] = useState<number | null>(null);
+  const [showDecoration, setShowDecoration] = useState<(null | 'in' | 'out')[]>([null, null, null]);
   const navigate = useNavigate();
 
   const preparatoryGrades = ['صف اول إعدادي', 'صف ثاني إعدادي', 'صف ثالث إعدادي'];
@@ -124,8 +139,6 @@ const Home: React.FC = () => {
   };
 
   const currentTerm = getCurrentTerm();
-
-
 
   useEffect(() => {
     localStorage.setItem('selectedPowers', JSON.stringify(selectedPowers));
@@ -159,7 +172,7 @@ const Home: React.FC = () => {
         if (teamSetupSection) {
           teamSetupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 300);
+      }, 2000);
     }
   };
 
@@ -174,7 +187,7 @@ const Home: React.FC = () => {
         if (unitsSection) {
           unitsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 300);
+      }, 2000);
     }
   };
 
@@ -183,9 +196,11 @@ const Home: React.FC = () => {
       setSelectedNewItem(null);
     } else {
       setSelectedNewItem(index);
+      // Clear all decorations when selecting a new stage
+      setShowDecoration([null, null, null]);
+      setHoveredStage(null);
       // Reset subject selection when stage changes
       setSelectedSubject(null);
-      setShowAllSubjects(false);
       // Scroll to main title with offset
       setTimeout(() => {
         const mainTitle = document.querySelector('.main-title');
@@ -198,7 +213,7 @@ const Home: React.FC = () => {
             behavior: 'smooth'
           });
         }
-      }, 300);
+      }, 2000);
     }
   };
 
@@ -219,17 +234,25 @@ const Home: React.FC = () => {
             behavior: 'smooth'
           });
         }
-      }, 300);
+      }, 2000);
     }
   };
 
   const addTeam = () => {
-    if (teamNameInput.trim() !== '' && teams.length < 6 && availableAvatars.length > 0) {
-      const randomIndex = Math.floor(Math.random() * availableAvatars.length);
-      const selectedAvatar = availableAvatars[randomIndex];
+    if (teamNameInput.trim() !== '' && teams.length < 6 && availableAvatars.length > 0 && availableColors.length > 0) {
+      const randomAvatarIndex = Math.floor(Math.random() * availableAvatars.length);
+      const selectedAvatar = availableAvatars[randomAvatarIndex];
+      
+      const randomColorIndex = Math.floor(Math.random() * availableColors.length);
+      const selectedColor = availableColors[randomColorIndex];
 
-      setTeams([...teams, { name: teamNameInput.trim(), avatar: selectedAvatar }]);
+      setTeams([...teams, { 
+        name: teamNameInput.trim(), 
+        avatar: selectedAvatar,
+        color: selectedColor
+      }]);
       setAvailableAvatars(availableAvatars.filter(avatar => avatar !== selectedAvatar));
+      setAvailableColors(availableColors.filter(color => color !== selectedColor));
       setTeamNameInput('');
     }
   };
@@ -239,6 +262,7 @@ const Home: React.FC = () => {
     const newTeams = teams.filter((_, i) => i !== index);
     setTeams(newTeams);
     setAvailableAvatars([...availableAvatars, teamToRemove.avatar]);
+    setAvailableColors([...availableColors, teamToRemove.color]);
   };
 
   const handleStart = () => {
@@ -248,8 +272,9 @@ const Home: React.FC = () => {
       alert('يجب إدخال اسمين فريقين على الأقل');
       return;
     }
-    // حفظ أسماء الفرق واسم الصف في localStorage
+    // حفظ بيانات الفرق (الاسم + الصورة) واسم الصف في localStorage
     localStorage.setItem('teams', JSON.stringify(validTeams.map(t => t.name)));
+    localStorage.setItem('teamsData', JSON.stringify(validTeams));
     localStorage.setItem('className', className);
     // الانتقال إلى صفحة المسابقة
     navigate('/quiz');
@@ -291,7 +316,7 @@ const Home: React.FC = () => {
     // Middle Stage Colors
     if (selectedNewItem === 1) {
       switch (subjectTitle) {
-        case 'اللغة العربية': return '#fffaf3';
+        case 'اللغة العربية': return '#f5f1f0';
         case 'اللغة الإنجليزية': return '#fbf3e7';
         case 'رياضيات': return '#f7ede3';
         case 'اجتماعيات': return '#f7e8cc';
@@ -313,8 +338,8 @@ const Home: React.FC = () => {
       case 'اجتماعيات': return '#fef6e9';
       case 'التربية الإسلامية': return '#faeede';
       case 'علوم': return '#fffdf8';
-      case 'تربية اسرية': return '#fff8ee';
-      case 'حاسوب': return '#f7f4ed';
+      case 'تربية اسرية': return '#f9eddd';
+      case 'حاسوب': return '#fefaf0';
       default: return '#fef7ee';
     }
   };
@@ -348,15 +373,70 @@ const Home: React.FC = () => {
               <div
                 key={idx}
                 onClick={() => handleNewItemSelect(idx)}
+                onMouseEnter={() => {
+                  // Only allow hover effects if no stage is selected
+                  if (selectedNewItem === null) {
+                  setHoveredStage(idx);
+                  setShowDecoration(prev => {
+                    const arr = [...prev];
+                    arr[idx] = 'in';
+                    return arr;
+                  });
+                  }
+                }}
+                onMouseLeave={() => {
+                  // Only clear hover effects if no stage is selected
+                  if (selectedNewItem === null) {
+                  setHoveredStage(null);
+                  setShowDecoration(prev => {
+                    const arr = [...prev];
+                    arr[idx] = 'out';
+                    setTimeout(() => {
+                      setShowDecoration(current => {
+                        const arr2 = [...current];
+                        arr2[idx] = null;
+                        return arr2;
+                      });
+                    }, 600);
+                    return arr;
+                  });
+                  }
+                }}
                 className={`custom-rounded flex flex-col overflow-hidden aspect-square cursor-pointer transition-all duration-300
                   ${isSelected ? '' : isDimmed ? '' : ''}
                 `}
               >
                 <div className="flex-1 flex items-center justify-center relative">
+                  {/* If the card is selected, keep the decoration image visible and fixed */}
+                  {selectedNewItem === idx && (
+                    <img
+                      src={
+                        idx === 0 ? "/assets/subjects/decoration.png" :
+                        idx === 1 ? "/assets/subjects/level2-decoration.png" :
+                        idx === 2 ? "/assets/subjects/level3-decoartion.png" :
+                        "/assets/subjects/decoration.png"
+                      }
+                      alt="زينة"
+                      className="absolute top-[20px] left-0 w-56 h-auto z-0 pointer-events-none select-none animate-decoration-appear"
+                    />
+                  )}
+                  {/* Decoration image above the stage image on hover, only if no stage is selected */}
+                  {showDecoration[idx] && selectedNewItem === null && (
+                    <img 
+                      src={
+                        idx === 0 ? "/assets/subjects/decoration.png" :
+                        idx === 1 ? "/assets/subjects/level2-decoration.png" :
+                        idx === 2 ? "/assets/subjects/level3-decoartion.png" :
+                        "/assets/subjects/decoration.png"
+                      }
+                      alt="زينة" 
+                      className={`absolute top-[20px] left-0 w-56 h-auto z-0 pointer-events-none select-none ${showDecoration[idx] === 'in' ? 'animate-decoration-appear' : 'animate-fall-to-bottom'}`}
+                    />
+                  )}
                   <img 
                     src={idx === 0 ? "/assets/level/level-1.png" : idx === 1 ? "/assets/level/level-2.png" : "/assets/level/level-3.png"} 
                     alt={item} 
-                    className={`absolute inset-0 w-full h-full object-contain transition-all duration-300 ${isDimmed ? 'filter grayscale opacity-50' : ''}`}
+                    className={`absolute inset-0 w-full h-full object-contain transition-all duration-300 ${isDimmed ? 'filter grayscale opacity-50' : ''} ${hoveredStage === idx ? '-translate-y-2' : ''}`}
                     style={{ objectPosition: '50% 20%' }}
                   />
                 </div>
@@ -400,8 +480,6 @@ const Home: React.FC = () => {
           })}
         </div>
       </div>
-
-
 
       {/* Always show subjects section */}
       <div className="container mb-12 subjects-section">
@@ -513,7 +591,7 @@ const Home: React.FC = () => {
       )}
 
       {/* Team Setup Section */}
-      <div ref={teamSetupRef} className="container mx-auto mb-24 mt-16 team-setup-section">
+      <div className="container mx-auto mb-24 mt-16 team-setup-section">
         {/* Section Title */}
         <h2 className="main-section-title mb-12 mt-0 flex items-center justify-center gap-2">
           <UserGroupIcon className="w-8 h-8" />
@@ -533,8 +611,9 @@ const Home: React.FC = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    // الانتقال إلى حقل إدخال اسم الفريق الأول
-                    teamInputRefs.current[0]?.focus();
+                    // Focus on team name input
+                    const teamInput = document.querySelector('input[placeholder="اكتب اسم الفريق هنا"]') as HTMLInputElement;
+                    if (teamInput) teamInput.focus();
                   }
                 }}
                 placeholder="اسم الصف"
@@ -590,20 +669,38 @@ const Home: React.FC = () => {
             <div className="flex justify-center items-end gap-8 flex-wrap">
               {teams.map((team, index) => (
                 <div key={index} className="relative flex flex-col items-center gap-3 animate-bounce-in">
+                  {/* Team Circle */}
+                  <div 
+                    className="avatar-container flex items-center justify-center animate-scale-in group relative"
+                    style={{
+                      borderColor: team.color,
+                      borderWidth: '6px',
+                      borderStyle: 'solid',
+                      boxShadow: `0 0 20px ${team.color}40`
+                    }}
+                  >
+                    <img 
+                      src={team.avatar} 
+                      alt={`Avatar for ${team.name}`} 
+                      className="avatar-image"
+                    />
                    <button
                     onClick={() => removeTeam(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors z-10"
+                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 rounded-full opacity-0 group-hover:opacity-100 z-20"
+                      style={{ pointerEvents: 'auto' }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                      <img src="/assets/close.png" alt="حذف" className="w-8 h-8" />
                   </button>
-                  {/* Team Circle */}
-                  <div className="w-36 h-36 rounded-full bg-gradient-to-br from-primary-purple to-purple-600 flex items-center justify-center border-6 border-primary-purple shadow-lg overflow-hidden animate-scale-in">
-                    <img src={team.avatar} alt={`Avatar for ${team.name}`} className="w-full h-full object-cover transform scale-105" />
                   </div>
                   {/* Team Name */}
-                  <span className="text-primary-purple font-bold text-xl animate-fade-in">
+                  <span 
+                    className="font-bold text-xl animate-fade-in px-4 py-2 rounded-full"
+                    style={{ 
+                      color: team.color,
+                      backgroundColor: `${team.color}20`,
+                      border: `2px solid ${team.color}`
+                    }}
+                  >
                     {team.name}
                   </span>
                 </div>

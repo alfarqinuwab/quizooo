@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeftOnRectangleIcon, UserIcon, BookOpenIcon, SparklesIcon, InformationCircleIcon, ShieldCheckIcon, ClockIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftOnRectangleIcon, BookOpenIcon, SparklesIcon, InformationCircleIcon, ShieldCheckIcon, ClockIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
 const TimerCircle = ({ timeLeft }: { timeLeft: number }) => {
   const radius = 85;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (timeLeft / 30) * circumference;
-      const progressColor = timeLeft <= 5 ? '#EF4444' : '#facc15';
+  const progressColor = timeLeft <= 5 ? '#EF4444' : '#facc15';
 
   return (
     <div className="relative w-[350px] h-[350px]">
@@ -41,12 +41,13 @@ const Details = () => {
   const navigate = useNavigate();
   const [className, setClassName] = useState('صف سادس ب');
   const [teams, setTeams] = useState<string[]>([]);
-  const [activeGroup, setActiveGroup] = useState<number>(-1);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [selectedPowers, setSelectedPowers] = useState<string[]>([]);
+  const [correctAnswer] = useState<number>(0); // Index of correct answer (0-based)
+  const [questionValue, setQuestionValue] = useState<number>(100);
 
   const handleQuestionsBoardClick = () => {
     // Get the last clicked rectangle from localStorage
@@ -73,20 +74,13 @@ const Details = () => {
   }, []);
 
   React.useEffect(() => {
-    const savedTeams = localStorage.getItem('teams');
-    if (savedTeams) {
-      setTeams(JSON.parse(savedTeams));
+    const savedTeamsData = localStorage.getItem('teamsData');
+    if (savedTeamsData) {
+      const teamsData = JSON.parse(savedTeamsData);
+      // Extract just the names for the team selection buttons
+      const teamNames = teamsData.map((team: any) => team.name);
+      setTeams(teamNames);
     }
-  }, []);
-
-  React.useEffect(() => {
-    const updateActiveGroup = () => {
-      const saved = localStorage.getItem('activeGroup');
-      if (saved) setActiveGroup(parseInt(saved, 10));
-    };
-    updateActiveGroup();
-    window.addEventListener('focus', updateActiveGroup);
-    return () => window.removeEventListener('focus', updateActiveGroup);
   }, []);
 
   useEffect(() => {
@@ -106,6 +100,23 @@ const Details = () => {
   useEffect(() => {
     const savedPowers = localStorage.getItem('selectedPowers');
     if (savedPowers) setSelectedPowers(JSON.parse(savedPowers));
+    
+    // Load the question value from the selected cell
+    const lastPlayedCell = localStorage.getItem('lastPlayedCell');
+    const board = localStorage.getItem('board');
+    if (lastPlayedCell && board) {
+      try {
+        const cellData = JSON.parse(lastPlayedCell);
+        const boardData = JSON.parse(board);
+        if (cellData.row !== undefined && cellData.col !== undefined && boardData[cellData.row]) {
+          const cellValue = boardData[cellData.row][cellData.col].value;
+          setQuestionValue(cellValue);
+          console.log('Question value set to:', cellValue);
+        }
+      } catch (error) {
+        console.error('Error loading question value:', error);
+      }
+    }
   }, []);
 
   // Map powerup id to icon
@@ -249,7 +260,7 @@ const Details = () => {
           {/* Points Rectangle */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-12 z-20">
             <div className="bg-primary-purple text-[#facc15] text-6xl font-extrabold rounded-3xl border-8 border-white shadow-lg px-24 py-6 number-font">
-              100
+              {questionValue}
             </div>
           </div>
           <div className="flex flex-col items-center w-full">
@@ -263,10 +274,10 @@ const Details = () => {
                 let optionStyle = "bg-white border border-gray-200 text-primary-purple";
                 if (selectedOption !== null) {
                   if (selectedOption === idx) {
-                    optionStyle = idx === 0
+                    optionStyle = idx === correctAnswer
                       ? "bg-green-500 border-green-500 text-white"
                       : "bg-red-500 border-red-500 text-white";
-                  } else if (idx === 0) {
+                  } else if (idx === correctAnswer) {
                     optionStyle = "bg-green-500 border-green-500 text-white";
                   }
                 }
@@ -306,24 +317,83 @@ const Details = () => {
               disabled={selectedOption === null && showOptions}
               onClick={async () => {
                 if (selectedOption === null && showOptions) return;
-                // 1. Save selected group
-                localStorage.setItem('activeGroup', idx.toString());
-                // 2. Award points to this group
-                const lastClickedRectangle = localStorage.getItem('lastClickedRectangle');
-                if (lastClickedRectangle) {
-                  // Rectangle id is like 'center-100', extract the number
-                  const match = lastClickedRectangle.match(/-(\d+)$/);
-                  const points = match ? parseInt(match[1], 10) : 0;
-                  // Get scores from localStorage or initialize
-                  let scores = [];
-                  try {
-                    scores = JSON.parse(localStorage.getItem('scores') || '[]');
-                  } catch { scores = []; }
-                  while (scores.length < teams.length) scores.push(0);
-                  scores[idx] += points;
-                  localStorage.setItem('scores', JSON.stringify(scores));
+                
+                // Check if answer is correct
+                const isCorrectAnswer = selectedOption === correctAnswer;
+                
+                // 1. Current answering team (for scoring)
+                const answeringTeam = idx;
+                
+                // Get total number of teams to calculate next turn
+                const savedTeamsData = localStorage.getItem('teamsData');
+                const totalTeams = savedTeamsData ? JSON.parse(savedTeamsData).length : 2;
+                
+                // 2. Handle board update for Connect Four based on correct/incorrect answer
+                const lastPlayedCell = JSON.parse(localStorage.getItem('lastPlayedCell') || '{}');
+                const board = JSON.parse(localStorage.getItem('board') || '[]');
+                
+                console.log('Last played cell:', lastPlayedCell);
+                console.log('Current board:', board);
+                console.log('Selected team:', idx);
+                console.log('Is correct answer:', isCorrectAnswer);
+                
+                if (lastPlayedCell && lastPlayedCell.row !== undefined && board.length) {
+                  if (isCorrectAnswer) {
+                    // If correct, assign team avatar to the cell
+                    board[lastPlayedCell.row][lastPlayedCell.col].team = answeringTeam;
+                    console.log('Assigning team', answeringTeam, 'to cell', lastPlayedCell);
+                    
+                    // Award points based on the circle value that was clicked
+                    const points = board[lastPlayedCell.row][lastPlayedCell.col].value;
+                    console.log('Awarding points:', points, 'to team:', answeringTeam);
+                    
+                    // Get scores from localStorage or initialize
+                    let scores = [];
+                    try {
+                      scores = JSON.parse(localStorage.getItem('scores') || '[]');
+                    } catch { scores = []; }
+                    while (scores.length < teams.length) scores.push(0);
+                    scores[answeringTeam] += points;
+                    localStorage.setItem('scores', JSON.stringify(scores));
+                    console.log('Updated scores:', scores);
+                  } else {
+                    // If incorrect, clear the cell (remove team assignment)
+                    board[lastPlayedCell.row][lastPlayedCell.col].team = null;
+                    console.log('Clearing cell', lastPlayedCell, 'due to incorrect answer');
+                    
+                    // Optionally deduct points for wrong answer
+                    let scores = [];
+                    try {
+                      scores = JSON.parse(localStorage.getItem('scores') || '[]');
+                    } catch { scores = []; }
+                    while (scores.length < teams.length) scores.push(0);
+                    // Deduct 50 points for wrong answer (you can adjust this)
+                    scores[answeringTeam] = Math.max(0, scores[answeringTeam] - 50);
+                    localStorage.setItem('scores', JSON.stringify(scores));
+                  }
+                  
+                  localStorage.setItem('board', JSON.stringify(board));
+                  console.log('Updated board saved:', board);
+                  console.log('Specific cell updated:', board[lastPlayedCell.row][lastPlayedCell.col]);
+                  
+                  // Verify what's actually in localStorage
+                  const storedBoard = localStorage.getItem('board');
+                  if (storedBoard) {
+                    const parsedStored = JSON.parse(storedBoard);
+                    console.log('✅ Verified localStorage board:', parsedStored[lastPlayedCell.row][lastPlayedCell.col]);
+                  }
                 }
-                // 3. Navigate to quiz page
+                
+                // 3. Advance to next team's turn (regardless of correct/incorrect answer)
+                const currentActiveGroup = parseInt(localStorage.getItem('activeGroup') || '0', 10);
+                const nextActiveGroup = (currentActiveGroup + 1) % totalTeams;
+                localStorage.setItem('activeGroup', nextActiveGroup.toString());
+                console.log(`Turn advancing from team ${currentActiveGroup} to team ${nextActiveGroup}`);
+                
+                // 4. Store the answer result for feedback
+                localStorage.setItem('lastAnswerCorrect', isCorrectAnswer.toString());
+                
+                // 5. Navigate to quiz page
                 navigate('/quiz');
               }}
             >

@@ -20,7 +20,7 @@ const Header = () => {
     { name: 'الصفحة الرئيسية', path: '/' },
     { 
       name: 'نبذة عنا', 
-      path: '/about',
+      path: '/family-challenge',
       button: {
         name: 'العب الآن',
         path: '/'
@@ -109,7 +109,7 @@ const Header = () => {
               >
                 <Link
                   to={item.path}
-                  className={`relative px-3 py-2 text-gray-800 hover:text-[#6B46C1] transition-colors duration-200 font-medium
+                  className={`relative px-3 py-2 text-gray-800 hover:text-[#6B46C1] transition-colors duration-200 font-bold text-2xl
           ${location.pathname === item.path ? 'text-[#6B46C1]' : ''}`}
                 >
                   {item.name}
@@ -126,7 +126,7 @@ const Header = () => {
                 {item.button && (
                   <Link
                     to={item.button.path}
-                    className="inline-flex items-center px-6 py-2 bg-[#facc15] text-white rounded-full font-medium hover:bg-[#facc15]/90 transition-colors duration-200 shadow-sm"
+                    className="inline-flex items-center px-6 py-2 bg-[#facc15] text-primary-purple rounded-full font-bold hover:bg-[#facc15]/90 transition-colors duration-200 shadow-sm text-xl"
                   >
                     {item.button.name}
                   </Link>
@@ -143,11 +143,10 @@ const Header = () => {
           >
             <Link
               to="/login"
-              className="flex items-center space-x-2 space-x-reverse text-gray-800 hover:text-[#6B46C1] transition-colors duration-200"
+              className="flex items-center space-x-2 space-x-reverse bg-primary-purple text-white rounded-full px-5 py-2 font-bold text-lg hover:bg-primary-purple/80 transition-colors duration-200"
             >
-              <span className="font-medium">تسجيل الدخول</span>
               <svg
-                className="w-5 h-5"
+                className="w-5 h-5 ml-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -159,6 +158,7 @@ const Header = () => {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
+              <span>تسجيل الدخول</span>
             </Link>
           </motion.div>
 

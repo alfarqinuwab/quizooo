@@ -6,6 +6,10 @@ import Home from './pages/Home';
 import Quiz from './pages/Quiz';
 import Results from './pages/Results';
 import Details from './pages/Details';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ChooseUserType from './pages/ChooseUserType';
+import FamilyChallenge from './pages/FamilyChallenge';
 
 const App: React.FC = () => {
   return (
@@ -17,8 +21,8 @@ const App: React.FC = () => {
 
 function AppContent() {
   const location = useLocation();
-  const hideHeader = location.pathname === '/details';
-  const hideFooter = location.pathname === '/details';
+  const hideHeader = location.pathname === '/details' || location.pathname === '/quiz';
+  const hideFooter = location.pathname === '/details' || location.pathname === '/login' || location.pathname === '/quiz';
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {!hideHeader && <Header />}
@@ -28,6 +32,10 @@ function AppContent() {
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/results" element={<Results />} />
           <Route path="/details" element={<Details />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/choose-user-type" element={<ChooseUserType />} />
+          <Route path="/family-challenge" element={<FamilyChallenge />} />
         </Routes>
       </main>
       {!hideFooter && <Footer />}
