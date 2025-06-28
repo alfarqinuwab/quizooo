@@ -12,18 +12,18 @@ const avatarImages = [
 ];
 
 const teamColors = [
-  '#FF6B6B', // Red
-  '#4ECDC4', // Teal
-  '#45B7D1', // Blue
-  '#96CEB4', // Green
-  '#FFEAA7', // Yellow
-  '#DDA0DD', // Plum
-  '#FFB347', // Orange
-  '#87CEEB', // Sky Blue
-  '#98FB98', // Pale Green
-  '#F0E68C', // Khaki
-  '#FFB6C1', // Light Pink
-  '#20B2AA', // Light Sea Green
+  '#6B46C1', // Primary Purple (matching app theme)
+  '#facc15', // Primary Yellow (matching app theme)
+  '#8B5FD6', // Light Purple
+  '#F59E0B', // Amber/Gold
+  '#9333EA', // Violet
+  '#EAB308', // Yellow Gold
+  '#7C3AED', // Deep Purple
+  '#FBBF24', // Light Gold
+  '#A855F7', // Medium Purple
+  '#F97316', // Orange (complements purple)
+  '#6366F1', // Indigo (purple family)
+  '#FCD34D', // Lighter Yellow
 ];
 
 const grades = ['الصف الأول', 'الصف الثاني', 'الصف الثالث', 'الصف الرابع', 'الصف الخامس', 'الصف السادس'];

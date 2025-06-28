@@ -27,6 +27,8 @@ function getTeamColor(idx: number, teams: { name: string; avatar: string; color:
   return colors[idx % colors.length];
 }
 
+
+
 const Quiz = () => {
   const navigate = useNavigate();
   const [teams, setTeams] = useState<{ name: string; avatar: string; color: string }[]>([]);
@@ -43,6 +45,23 @@ const Quiz = () => {
   const [board, setBoard] = useState<{ value: number; team: number | null }[][]>([]);
   const [winLines, setWinLines] = useState<WinLine[]>([]);
   const [showWinNotifications, setShowWinNotifications] = useState(true);
+  const [shownWinNotifications, setShownWinNotifications] = useState<Set<string>>(new Set());
+  const [showMotivationMessage, setShowMotivationMessage] = useState(false);
+  const [motivationTeam, setMotivationTeam] = useState<number>(0);
+  const [animatingCell, setAnimatingCell] = useState<{row: number, col: number} | null>(null);
+  const [newWinsToShow, setNewWinsToShow] = useState<WinLine[]>([]);
+  
+  // Motivation messages array
+  const motivationMessages = [
+    'أحسنتم! إجابة ممتازة! 🎉',
+    'رائع! استمروا هكذا! ⭐', 
+    'ممتاز! فريق قوي! 💪',
+    'أبدعتم! إجابة صحيحة! 🌟',
+    'عمل رائع! مبروك! 🎊',
+    'فريق ذكي! أحسنتم! 🧠',
+    'مذهل! استمروا! 🚀',
+    'فريق متميز! بارك الله فيكم! 🏆'
+  ];
 
   useEffect(() => {
     const savedTeamsData = localStorage.getItem('teamsData');
@@ -103,6 +122,13 @@ const Quiz = () => {
       setWinLines(parsedWinLines);
       console.log('🏆 Loading win lines from localStorage:', parsedWinLines);
     }
+
+    // Load shown win notifications from localStorage
+    const savedShownNotifications = localStorage.getItem('shownWinNotifications');
+    if (savedShownNotifications) {
+      const parsedShownNotifications = JSON.parse(savedShownNotifications);
+      setShownWinNotifications(new Set(parsedShownNotifications));
+    }
   }, []);
 
   useEffect(() => {
@@ -123,6 +149,32 @@ const Quiz = () => {
       const wasCorrect = lastAnswerCorrect === 'true';
       console.log('🔄 QUIZ PAGE - Returned from details:', wasCorrect ? 'Correct answer!' : 'Incorrect answer!');
       localStorage.removeItem('lastAnswerCorrect');
+      
+      // Show motivation message for correct answers
+      if (wasCorrect) {
+        setMotivationTeam(activeGroup);
+        setShowMotivationMessage(true);
+        
+        // Get the cell that was just played and trigger flip animation
+        const lastPlayedCell = localStorage.getItem('lastPlayedCell');
+        if (lastPlayedCell) {
+          try {
+            const cellData = JSON.parse(lastPlayedCell);
+            setAnimatingCell({ row: cellData.row, col: cellData.col });
+            // Clear animation after 1 second
+            setTimeout(() => {
+              setAnimatingCell(null);
+            }, 1000);
+          } catch (error) {
+            console.error('Error parsing last played cell:', error);
+          }
+        }
+        
+        // Auto-hide motivation message after 3 seconds
+        setTimeout(() => {
+          setShowMotivationMessage(false);
+        }, 3000);
+      }
       
       // Add a small delay to ensure localStorage is fully written
       setTimeout(() => {
@@ -195,13 +247,35 @@ const Quiz = () => {
       
       if (wins.length > 0) {
         console.log('🏆 Wins detected:', wins);
-        wins.forEach(win => {
-          const teamName = teams[win.team]?.name || `Team ${win.team + 1}`;
-          console.log(`🎉 ${teamName} has a ${win.direction} win!`);
+        
+        // Check for new wins that haven't been shown yet
+        const newWins = wins.filter(win => {
+          const winId = `${win.team}-${win.direction}-${win.cells.map(c => `${c.row}-${c.col}`).join('-')}`;
+          return !shownWinNotifications.has(winId);
         });
         
-        // Show notifications for new wins
-        setShowWinNotifications(true);
+                 if (newWins.length > 0) {
+           // Add new wins to shown notifications
+           const updatedShownNotifications = new Set(shownWinNotifications);
+           newWins.forEach(win => {
+             const winId = `${win.team}-${win.direction}-${win.cells.map(c => `${c.row}-${c.col}`).join('-')}`;
+             updatedShownNotifications.add(winId);
+             
+             const teamName = teams[win.team]?.name || `Team ${win.team + 1}`;
+             console.log(`🎉 NEW WIN: ${teamName} has a ${win.direction} win!`);
+           });
+           
+           setShownWinNotifications(updatedShownNotifications);
+           localStorage.setItem('shownWinNotifications', JSON.stringify(Array.from(updatedShownNotifications)));
+           
+           // Show new win notifications
+           setNewWinsToShow(newWins);
+           
+           // Auto-hide new win notifications after 5 seconds
+           setTimeout(() => {
+             setNewWinsToShow([]);
+           }, 5000);
+         }
       }
       
       // Check if we're overwriting team assignments
@@ -220,16 +294,7 @@ const Quiz = () => {
     }
   }, [board, teams]);
 
-  // Auto-hide win notifications after 5 seconds
-  useEffect(() => {
-    if (winLines.length > 0 && showWinNotifications) {
-      const timer = setTimeout(() => {
-        setShowWinNotifications(false);
-      }, 5000); // Hide after 5 seconds
 
-      return () => clearTimeout(timer);
-    }
-  }, [winLines, showWinNotifications]);
 
   // Listen for storage changes from other tabs/pages
   useEffect(() => {
@@ -266,8 +331,6 @@ const Quiz = () => {
       navigate('/details');
     }
   };
-
-
 
   // Exit button handler
   const handleExit = () => {
@@ -383,8 +446,6 @@ const Quiz = () => {
     );
   };
 
-
-
   // Reset board function to clear all team assignments
   const resetBoard = () => {
     const defaultBoard = Array.from({ length: ROWS }, (_, row) =>
@@ -393,17 +454,77 @@ const Quiz = () => {
     setBoard(defaultBoard);
     setWinLines([]);
     setShowWinNotifications(false);
+    setShownWinNotifications(new Set());
+    setNewWinsToShow([]);
     localStorage.setItem('board', JSON.stringify(defaultBoard));
     localStorage.setItem('winLines', JSON.stringify([]));
+    localStorage.removeItem('shownWinNotifications');
     console.log('🔄 Board reset to default state');
   };
 
-
-
-
-
   return (
     <div className="w-screen h-screen flex flex-col overflow-hidden" style={{margin: 0, padding: 0}}>
+      {/* Flip Animation Styles */}
+      <style>{`
+        .flip-animation {
+          animation: flipToAvatar 1s ease-in-out;
+        }
+        
+        @keyframes flipToAvatar {
+          0% { 
+            transform: rotateY(0deg); 
+          }
+          50% { 
+            transform: rotateY(90deg); 
+          }
+          100% { 
+            transform: rotateY(0deg); 
+          }
+        }
+        
+        .flip-animation .flip-front {
+          animation: hideFront 1s ease-in-out;
+        }
+        
+        .flip-animation .flip-back {
+          animation: showBack 1s ease-in-out;
+        }
+        
+        @keyframes hideFront {
+          0% { opacity: 1; }
+          50% { opacity: 0; }
+          51% { opacity: 0; }
+          100% { opacity: 0; }
+        }
+        
+        @keyframes showBack {
+          0% { opacity: 0; }
+          50% { opacity: 0; }
+          51% { opacity: 1; }
+          100% { opacity: 1; }
+        }
+        
+        .flip-front {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 1;
+        }
+        
+        .flip-back {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+        }
+      `}</style>
+      
       {/* Header */}
       <header className="bg-primary-purple text-white flex items-center justify-between border-b-4 border-[#facc15] relative z-50" style={{height: HEADER_HEIGHT, minHeight: HEADER_HEIGHT, maxHeight: HEADER_HEIGHT, flex: '0 0 auto', padding: '0 2rem'}}>
         <button 
@@ -418,15 +539,16 @@ const Quiz = () => {
           {className}
         </h1>
         
-        {/* Win notifications in header */}
-        {winLines.length > 0 && showWinNotifications && (
+        {/* Notifications in header */}
+        {(newWinsToShow.length > 0 || showMotivationMessage) ? (
           <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-            {winLines.map((winLine, idx) => {
+            {/* Win notifications - only show new wins */}
+            {newWinsToShow.map((winLine, idx) => {
               const teamName = teams[winLine.team]?.name || `Team ${winLine.team + 1}`;
               const teamColor = getTeamColor(winLine.team, teams);
               return (
                 <div
-                  key={idx}
+                  key={`new-win-${idx}`}
                   className="bg-white rounded-2xl px-6 py-2 shadow-2xl border-4 animate-bounce-in"
                   style={{ borderColor: teamColor }}
                 >
@@ -437,8 +559,28 @@ const Quiz = () => {
                 </div>
               );
             })}
+            
+            {/* Motivation message */}
+            {showMotivationMessage && teams[motivationTeam] && (
+              <div
+                className="bg-white rounded-2xl px-6 py-2 shadow-2xl border-4 animate-bounce-in"
+                style={{ borderColor: getTeamColor(motivationTeam, teams) }}
+              >
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={teams[motivationTeam].avatar} 
+                    alt={teams[motivationTeam].name}
+                    className="w-8 h-8 rounded-full border-2 border-white"
+                    style={{ borderColor: getTeamColor(motivationTeam, teams) }}
+                  />
+                  <span className="text-lg font-bold whitespace-nowrap" style={{ color: getTeamColor(motivationTeam, teams) }}>
+                    {motivationMessages[Math.floor(Math.random() * motivationMessages.length)]}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        ) : null}
         
         <button 
           className="flex items-center gap-2 text-lg font-bold"
@@ -508,6 +650,7 @@ const Quiz = () => {
                   const teamData = hasTeam && cell.team !== null ? teams[cell.team] : null;
                   const teamColor = hasTeam && cell.team !== null ? getTeamColor(cell.team, teams) : '#fff';
                   const isInWinLine = isCellInWinLine(rowIdx, colIdx);
+                  const isAnimating = animatingCell?.row === rowIdx && animatingCell?.col === colIdx;
                   
                   // Debug logging for cells with teams
                   if (hasTeam) {
@@ -519,26 +662,86 @@ const Quiz = () => {
                   return (
                     <div key={rowIdx} className="relative">
                       <button
-                        className="rounded-full w-32 h-32 flex items-center justify-center text-4xl font-bold shadow-md transition-colors duration-200 relative z-10"
+                        className={`rounded-full w-32 h-32 flex items-center justify-center text-4xl font-bold shadow-md transition-colors duration-200 relative z-10 overflow-hidden ${isInWinLine ? 'cursor-default' : ''} ${isAnimating ? 'flip-animation' : ''}`}
                         style={{
-                          background: teamColor,
+                          background: isInWinLine ? '#9CA3AF' : teamColor, // Grey out winning circles
                           color: hasTeam ? '#fff' : '#6B46C1',
-                          cursor: !hasTeam ? 'pointer' : 'default',
-                          border: isInWinLine ? `6px solid gold` : (hasTeam ? `4px solid ${teamColor}` : '4px solid #6B46C1'),
-                          opacity: isInWinLine ? 0.4 : 1
+                          cursor: !hasTeam && !isInWinLine ? 'pointer' : 'default',
+                          border: isInWinLine ? `6px solid #6B5B95` : (hasTeam ? `4px solid ${teamColor}` : '4px solid #6B46C1'),
+                          opacity: isInWinLine ? 0.8 : 1, // Slightly reduce opacity but keep visible
+                          filter: isInWinLine ? 'grayscale(0.7)' : 'none', // Add grayscale filter for winning circles
+                          pointerEvents: isInWinLine ? 'none' : 'auto' // Disable clicks on winning circles
                         }}
                         onClick={() => handleCellClick(rowIdx, colIdx)}
-                        disabled={hasTeam}
+                        disabled={hasTeam || isInWinLine}
                       >
-                        {hasTeam ? (
+                        {/* Diagonal stripes background - only for winning circles */}
+                        {isInWinLine && (
+                          <div 
+                            className="absolute inset-0"
+                            style={{
+                              opacity: 0.30,
+                              backgroundImage: `repeating-linear-gradient(
+                                45deg,
+                                transparent,
+                                transparent 8px,
+                                rgba(255,255,255,0.8) 8px,
+                                rgba(255,255,255,0.8) 16px
+                              )`
+                            }}
+                          />
+                        )}
+                        {isAnimating ? (
+                          // Flip animation content
+                          <>
+                            <div className="flip-front">
+                              <span style={{ color: '#6B46C1' }}>{cell.value}</span>
+                            </div>
+                            <div className="flip-back">
+                              {teamData?.avatar ? (
+                                <img 
+                                  src={teamData.avatar} 
+                                  alt="avatar" 
+                                  className="w-20 h-20 rounded-full border-2 border-white" 
+                                  style={{
+                                    filter: isInWinLine ? 'grayscale(1) brightness(0.7)' : 'none'
+                                  }}
+                                />
+                              ) : (
+                                <div 
+                                  className="w-20 h-20 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-white font-bold text-2xl border-2 border-white"
+                                  style={{
+                                    filter: isInWinLine ? 'grayscale(1) brightness(0.7)' : 'none'
+                                  }}
+                                >
+                                  {teamData?.name?.charAt(0) || (cell.team !== null ? cell.team + 1 : '?')}
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        ) : hasTeam ? (
+                          // Normal team content
                           teamData?.avatar ? (
-                            <img src={teamData.avatar} alt="avatar" className="w-20 h-20 rounded-full border-2 border-white" />
+                            <img 
+                              src={teamData.avatar} 
+                              alt="avatar" 
+                              className="w-20 h-20 rounded-full border-2 border-white" 
+                              style={{
+                                filter: isInWinLine ? 'grayscale(1) brightness(0.7)' : 'none'
+                              }}
+                            />
                           ) : (
-                            <div className="w-20 h-20 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-white font-bold text-2xl border-2 border-white">
+                            <div 
+                              className="w-20 h-20 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-white font-bold text-2xl border-2 border-white"
+                              style={{
+                                filter: isInWinLine ? 'grayscale(1) brightness(0.7)' : 'none'
+                              }}
+                            >
                               {teamData?.name?.charAt(0) || (cell.team !== null ? cell.team + 1 : '?')}
                             </div>
                           )
                         ) : (
+                          // Empty circle content
                           <span style={{ color: '#6B46C1' }}>{cell.value}</span>
                         )}
                       </button>
@@ -553,98 +756,148 @@ const Quiz = () => {
         </div>
         
         {/* Right Sidebar - Teams */}
-        <div className="bg-white border-l-4 border-primary-purple flex flex-col justify-start items-start gap-6 py-6 px-4" style={{width: SIDEBAR_WIDTH, minWidth: SIDEBAR_WIDTH, maxWidth: SIDEBAR_WIDTH}}>
-          {teams.map((team, idx) => (
-            <div key={idx} className="flex flex-row items-center justify-center gap-4 w-full">
-              {/* الصورة (كبيرة جداً) */}
-              <img 
-                src={team.avatar} 
-                alt={team.name + ' avatar'} 
-                className="w-[154px] h-[154px] rounded-full bg-white shadow-lg object-cover" 
-                style={{
-                  borderWidth: '6px',
-                  borderStyle: 'solid',
-                  borderColor: team.color || '#facc15',
-                  boxShadow: `0 0 20px ${team.color || '#facc15'}40`
-                }}
-              />
-              {/* عمود المستطيلين */}
-              <div className="flex flex-col items-center gap-2 justify-center flex-1">
-                {/* المستطيل البنفسجي */}
-                <button
-                  className={`rounded-full w-full h-16 text-2xl font-bold transition-all duration-300 flex items-center justify-center shadow-lg px-6 mb-0 ${
-                    activeGroup === idx ? 'animate-pulse' : ''
-                  }`}
-                  style={{
-                    borderWidth: activeGroup === idx ? '6px' : '4px',
-                    borderStyle: 'solid',
-                    borderColor: team.color || '#facc15',
-                    backgroundColor: activeGroup === idx ? (team.color || '#facc15') : '#6B46C1',
-                    color: '#fff',
-                    transform: activeGroup === idx ? 'scale(1.08)' : 'scale(1)',
-                    boxShadow: activeGroup === idx 
-                      ? `0 0 25px ${team.color || '#facc15'}60, 0 0 50px ${team.color || '#facc15'}30` 
-                      : '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  }}
-                  onClick={() => {
-                    setActiveGroup(idx);
-                    localStorage.setItem('activeGroup', idx.toString());
-                  }}
-                >
-                  <span className="w-full text-center block truncate">
-                    {activeGroup === idx && '🎯 '}{team.name}{activeGroup === idx && ' 🎯'}
-                  </span>
-                </button>
-                {/* مستطيل النقاط */}
-                <div 
-                  className="flex items-center bg-white rounded-full p-4 shadow-lg justify-between h-[70px] w-full mt-0"
-                  style={{
-                    borderWidth: '3px',
-                    borderStyle: 'solid',
-                    borderColor: team.color || '#facc15'
-                  }}
-                >
-                  <button
-                    className="rounded-full w-12 h-12 flex items-center justify-center transition-colors shadow-md"
+        <div className="bg-gray-100 border-l-4 border-primary-purple flex flex-col justify-start items-start py-4 px-4" style={{width: SIDEBAR_WIDTH, minWidth: SIDEBAR_WIDTH, maxWidth: SIDEBAR_WIDTH, gap: teams.length > 4 ? '8px' : teams.length > 2 ? '12px' : '16px'}}>
+          {teams.map((team, idx) => {
+            // Responsive sizing based on team count
+            const isCompact = teams.length > 4;
+            const isMedium = teams.length > 2 && teams.length <= 4;
+            const avatarSize = isCompact ? '80px' : isMedium ? '100px' : '120px';
+            const buttonHeight = isCompact ? 'h-10' : isMedium ? 'h-12' : 'h-14';
+            const textSize = isCompact ? 'text-lg' : isMedium ? 'text-xl' : 'text-xl';
+            const scoreSize = isCompact ? 'text-xl' : isMedium ? 'text-2xl' : 'text-2xl';
+            
+            // Count how many wins this team has
+            const teamWinCount = winLines.filter(winLine => winLine.team === idx).length;
+            const badgeSize = isCompact ? '24px' : isMedium ? '28px' : '32px';
+            const badgeFontSize = isCompact ? '12px' : isMedium ? '14px' : '16px';
+            
+            return (
+            <div 
+              key={idx} 
+              className="w-full rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-3xl"
+              style={{
+                backgroundColor: activeGroup === idx ? (team.color || '#6B46C1') : '#f8f9fa',
+                borderWidth: '3px',
+                borderStyle: 'solid',
+                borderColor: team.color || '#6B46C1',
+                boxShadow: `0 8px 25px ${team.color || '#6B46C1'}50`,
+                padding: isCompact ? '12px' : isMedium ? '16px' : '24px',
+              }}
+            >
+              <div className={`flex flex-row items-center justify-center w-full ${isCompact ? 'gap-2' : 'gap-4'}`}>
+                {/* الصورة */}
+                <div className="relative">
+                  <img 
+                    src={team.avatar} 
+                    alt={team.name + ' avatar'} 
+                    className="rounded-full bg-white shadow-lg object-cover" 
                     style={{
-                      backgroundColor: team.color || '#6B46C1',
+                      width: avatarSize,
+                      height: avatarSize,
+                      borderWidth: isCompact ? '3px' : '5px',
+                      borderStyle: 'solid',
+                      borderColor: activeGroup === idx ? '#fff' : (team.color || '#6B46C1'),
+                      boxShadow: activeGroup === idx ? `0 0 15px rgba(255,255,255,0.8)` : `0 0 15px ${team.color || '#6B46C1'}40`
+                    }}
+                  />
+                  {/* Win count badge */}
+                  {teamWinCount > 0 && (
+                    <div 
+                      className="absolute -top-1 -right-1 rounded-full flex items-center justify-center font-bold shadow-lg"
+                      style={{
+                        width: badgeSize,
+                        height: badgeSize,
+                        backgroundColor: '#facc15',
+                        color: '#6B46C1',
+                        fontSize: badgeFontSize,
+                        border: '3px solid white',
+                        boxShadow: '0 4px 12px rgba(250, 204, 21, 0.6)',
+                        zIndex: 10
+                      }}
+                    >
+                      {teamWinCount}
+                    </div>
+                  )}
+                </div>
+                {/* عمود المستطيلين */}
+                <div className={`flex flex-col items-center justify-center flex-1 ${isCompact ? 'gap-1' : 'gap-3'}`}>
+                  {/* المستطيل البنفسجي */}
+                  <button
+                    className={`rounded-full w-full ${buttonHeight} ${textSize} font-bold transition-all duration-300 flex items-center justify-center shadow-lg px-4 ${
+                      activeGroup === idx ? 'animate-pulse' : ''
+                    }`}
+                    style={{
                       borderWidth: '3px',
                       borderStyle: 'solid',
-                      borderColor: team.color || '#facc15'
+                      borderColor: activeGroup === idx ? '#fff' : (team.color || '#6B46C1'),
+                      backgroundColor: activeGroup === idx ? 'rgba(255,255,255,0.9)' : (team.color || '#6B46C1'),
+                      color: activeGroup === idx ? (team.color || '#6B46C1') : '#fff',
+                      fontWeight: 'bold',
+                      boxShadow: activeGroup === idx 
+                        ? `0 0 20px rgba(255,255,255,0.8)` 
+                        : '0 2px 8px rgba(0, 0, 0, 0.2)',
                     }}
-                    onClick={() => handleScore(idx, -100)}
+                    onClick={() => {
+                      setActiveGroup(idx);
+                      localStorage.setItem('activeGroup', idx.toString());
+                    }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="16" cy="16" r="15" fill={team.color || '#6B46C1'} />
-                      <rect x="8" y="13.5" width="16" height="5" rx="2.5" fill="white" />
-                    </svg>
+                    <span className="w-full text-center block truncate">
+                      {activeGroup === idx && '🎯 '}{team.name}{activeGroup === idx && ' 🎯'}
+                    </span>
                   </button>
-                  <span 
-                    className="text-3xl font-extrabold text-center number-font"
-                    style={{ color: team.color || '#6B46C1' }}
-                  >
-                    {scores[idx]}
-                  </span>
-                  <button
-                    className="rounded-full w-12 h-12 flex items-center justify-center transition-colors shadow-md"
+                  {/* مستطيل النقاط */}
+                  <div 
+                    className={`flex items-center bg-white rounded-full shadow-lg justify-between w-full ${isCompact ? 'h-[50px] p-2' : 'h-[60px] p-3'}`}
                     style={{
-                      backgroundColor: team.color || '#6B46C1',
                       borderWidth: '3px',
                       borderStyle: 'solid',
-                      borderColor: team.color || '#facc15'
+                      borderColor: activeGroup === idx ? '#fff' : (team.color || '#6B46C1')
                     }}
-                    onClick={() => handleScore(idx, 100)}
                   >
-                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="16" cy="16" r="15" fill={team.color || '#6B46C1'} />
-                      <rect x="8" y="13.5" width="16" height="5" rx="2.5" fill="white" />
-                      <rect x="13.5" y="8" width="5" height="16" rx="2.5" fill="white" />
-                    </svg>
-                  </button>
+                    <button
+                      className={`rounded-full flex items-center justify-center transition-colors shadow-md hover:scale-110 ${isCompact ? 'w-8 h-8' : 'w-10 h-10'}`}
+                      style={{
+                        backgroundColor: team.color || '#6B46C1',
+                        borderWidth: '2px',
+                        borderStyle: 'solid',
+                        borderColor: activeGroup === idx ? '#fff' : (team.color || '#6B46C1')
+                      }}
+                      onClick={() => handleScore(idx, -100)}
+                    >
+                      <svg width={isCompact ? "20" : "24"} height={isCompact ? "20" : "24"} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="15" fill={team.color || '#6B46C1'} />
+                        <rect x="8" y="13.5" width="16" height="5" rx="2.5" fill="white" />
+                      </svg>
+                    </button>
+                    <span 
+                      className={`${scoreSize} font-extrabold text-center number-font`}
+                      style={{ color: team.color || '#6B46C1' }}
+                    >
+                      {scores[idx]}
+                    </span>
+                    <button
+                      className={`rounded-full flex items-center justify-center transition-colors shadow-md hover:scale-110 ${isCompact ? 'w-8 h-8' : 'w-10 h-10'}`}
+                      style={{
+                        backgroundColor: team.color || '#6B46C1',
+                        borderWidth: '2px',
+                        borderStyle: 'solid',
+                        borderColor: activeGroup === idx ? '#fff' : (team.color || '#6B46C1')
+                      }}
+                      onClick={() => handleScore(idx, 100)}
+                    >
+                      <svg width={isCompact ? "20" : "24"} height={isCompact ? "20" : "24"} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="15" fill={team.color || '#6B46C1'} />
+                        <rect x="8" y="13.5" width="16" height="5" rx="2.5" fill="white" />
+                        <rect x="13.5" y="8" width="5" height="16" rx="2.5" fill="white" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
